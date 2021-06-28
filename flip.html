@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flip</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+
+<h1>Flip</h1>
+
+<h2>Original</h2>
+
+<img id="original" src="example.png" alt="original source">
+
+<h2>Flip Horizontal</h2>
+
+<canvas id="flipHorizontal"></canvas>
+
+<h2>Flip Vertical</h2>
+
+<canvas id="flipVertical"></canvas>
+
+<h2>Rotate 90</h2>
+
+<canvas id="rotate90"></canvas>
+
+<h2>Rotate 180</h2>
+
+<canvas id="rotate180"></canvas>
+
+<h2>Rotate 270</h2>
+
+<canvas id="rotate270"></canvas>
+
+<script>
+const original = document.querySelector('#original');
+
+window.addEventListener('load', (event) => {
+  const WIDTH = original.width;
+  const HEIGHT = original.height;
+  const HALF_WIDTH = WIDTH / 2;
+  const HALF_HEIGHT = HEIGHT / 2;
+
+  let canvas, context;
+
+  canvas = document.querySelector('#flipHorizontal');
+  context = canvas.getContext('2d');
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  context.translate(WIDTH, 0);
+  context.scale(-1, 1);
+  context.drawImage(original, 0, 0);
+
+  canvas = document.querySelector('#flipVertical');
+  context = canvas.getContext('2d');
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  context.translate(0, HEIGHT);
+  context.scale(1, -1);
+  context.drawImage(original, 0, 0);
+
+  for (let [id, angle] of [
+    ['#rotate90', Math.PI / 2],
+    ['#rotate180', Math.PI],
+    ['#rotate270', 3 * Math.PI / 2]]) {
+    canvas = document.querySelector(id);
+    context = canvas.getContext('2d');
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    // Rotate around the center of the canvas
+    context.translate(HALF_WIDTH, HALF_HEIGHT);
+    context.rotate(angle);
+    context.translate(-HALF_WIDTH, -HALF_HEIGHT);
+    context.drawImage(original, 0, 0);
+  }
+});
+</script>
+</body>
+
+</html>
