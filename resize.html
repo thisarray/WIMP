@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resize</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+
+<h1>Resize</h1>
+
+<h2>Original</h2>
+
+<img id="original" src="example.png" alt="original source">
+
+<h2>Resized</h2>
+
+<canvas id="resized" width="640" height="480"></canvas>
+
+<script>
+const original = document.querySelector('#original');
+const canvas = document.querySelector('#resized');
+const context = canvas.getContext('2d');
+
+window.addEventListener('load', (event) => {
+  let scale = Math.max(canvas.width / original.width, canvas.height / original.height);
+  context.drawImage(original, 0, 0, original.width * scale, original.height * scale);
+});
+</script>
+</body>
+
+</html>
