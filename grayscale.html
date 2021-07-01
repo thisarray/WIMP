@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grayscale</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+
+<h1>Grayscale</h1>
+
+<h2>Original</h2>
+
+<img id="original" src="example.png" alt="original source">
+
+<h2>Average</h2>
+
+<canvas id="average"></canvas>
+
+<h2>Inverted</h2>
+
+<canvas id="inverted"></canvas>
+
+<h2>Sepia</h2>
+
+<canvas id="sepia"></canvas>
+
+<h2>Red</h2>
+
+<canvas id="red"></canvas>
+
+<h2>Green</h2>
+
+<canvas id="green"></canvas>
+
+<h2>Blue</h2>
+
+<canvas id="blue"></canvas>
+
+<script>
+const original = document.querySelector('#original');
+
+function average(r, g, b, a) {
+  let average = (r + g + b) / 3;
+  return [average, average, average, a];
+}
+
+function inverted(r, g, b, a) {
+  return [255 - r, 255 - g, 255 - b, a];
+}
+
+function sepia(r, g, b, a) {
+  return [Math.min(Math.round((0.393 * r) + (0.769 * g) + (0.189 * b)), 255),
+          Math.min(Math.round((0.349 * r) + (0.686 * g) + (0.168 * b)), 255),
+          Math.min(Math.round((0.272 * r) + (0.534 * g) + (0.131 * b)), 255),
+          a];
+}
+
+function red(r, g, b, a) {
+  return [r, 0, 0, a];
+}
+
+function green(r, g, b, a) {
+  return [0, g, 0, a];
+}
+
+function blue(r, g, b, a) {
+  return [0, 0, b, a];
+}
+
+window.addEventListener('load', (event) => {
+  const WIDTH = original.width;
+  const HEIGHT = original.height;
+
+  let canvas, context, imageData, result;
+
+  for (let [id, transform] of [
+    ['#average', average],
+    ['#inverted', inverted],
+    ['#sepia', sepia],
+    ['#red', red],
+    ['#green', green],
+    ['#blue', blue]]) {
+    canvas = document.querySelector(id);
+    context = canvas.getContext('2d');
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    context.drawImage(original, 0, 0);
+    imageData = context.getImageData(0, 0, WIDTH, HEIGHT);
+    for (let i = 0; i < imageData.data.length; i += 4) {
+      result = transform(imageData.data[i], imageData.data[i+1], imageData.data[i+2], imageData.data[i+3]);
+      for (let j = 0; j < 4; j++) {
+        imageData.data[i+j] = result[j];
+      }
+    }
+    context.putImageData(imageData, 0, 0);
+  }
+});
+</script>
+</body>
+
+</html>
