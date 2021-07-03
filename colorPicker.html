@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color picker</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+<section id="imageLoader" class="hidden">
+  <img class="hidden" src="example.png" alt="original source">
+</section>
+
+<h1>Color picker</h1>
+
+<canvas id="screen"></canvas>
+
+<p id="info"></p>
+
+<script>
+const canvas = document.querySelector('#screen');
+const context = canvas.getContext('2d');
+const info = document.querySelector('#info');
+
+canvas.addEventListener('mousedown', (event) => {
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect(),
+      x = Math.floor(event.clientX - box.left),
+      y = Math.floor(event.clientY - box.top),
+      data = context.getImageData(x, y, 1, 1).data,
+      r = data[0],
+      g = data[1],
+      b = data[2];
+  info.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
+  info.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
+  info.textContent = `rgb(${ r }, ${ g }, ${ b }) @ (${ x }, ${ y })`;
+});
+
+canvas.addEventListener('mousemove', (event) => {
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect(),
+      x = Math.floor(event.clientX - box.left),
+      y = Math.floor(event.clientY - box.top),
+      data = context.getImageData(x, y, 1, 1).data,
+      r = data[0],
+      g = data[1],
+      b = data[2];
+  info.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
+  info.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
+  info.textContent = `rgb(${ r }, ${ g }, ${ b }) @ (${ x }, ${ y })`;
+});
+
+window.addEventListener('load', (event) => {
+  let image = document.images[0];
+  canvas.width = image.width;
+  canvas.height = image.height;
+  context.drawImage(image, 0, 0);
+});
+</script>
+</body>
+
+</html>
