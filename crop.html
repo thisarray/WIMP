@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crop</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+<section id="imageLoader" class="hidden">
+  <img class="hidden" src="example.png" alt="original source">
+</section>
+
+<h1>Crop</h1>
+
+<canvas id="screen"></canvas>
+
+<p id="info"></p>
+
+<h2>Cropped</h2>
+
+<canvas id="cropped"></canvas>
+
+<script>
+const screen = document.querySelector('#screen');
+const info = document.querySelector('#info');
+
+let started = false,
+    image, startX, startY;
+
+screen.addEventListener('mousedown', (event) => {
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect();
+  started = true;
+  startX = Math.floor(event.clientX - box.left);
+  startY = Math.floor(event.clientY - box.top);
+});
+
+screen.addEventListener('mousemove', (event) => {
+  if (!started) {
+    return;
+  }
+
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect(),
+      x = Math.floor(event.clientX - box.left),
+      y = Math.floor(event.clientY - box.top),
+      width = Math.abs(startX - x),
+      height = Math.abs(startY - y),
+      context = event.target.getContext('2d');
+  context.save();
+  context.clearRect(0, 0, image.width, image.height);
+  context.drawImage(image, 0, 0);
+
+  // Draw a black rectangle as feedback
+  context.lineWidth = 2;
+  context.strokeStyle = 'black';
+  context.strokeRect(Math.min(x, startX), Math.min(y, startY), width, height);
+
+  context.restore();
+
+  info.textContent = `topleft: (${ Math.min(x, startX) }, ${ Math.min(y, startY) }), width: ${ width }, height: ${ height }`;
+});
+
+screen.addEventListener('mouseup', (event) => {
+  if (!started) {
+    return;
+  }
+
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect(),
+      x = Math.floor(event.clientX - box.left),
+      y = Math.floor(event.clientY - box.top),
+      width = Math.abs(startX - x),
+      height = Math.abs(startY - y),
+      outputElement = document.querySelector('#cropped'),
+      outputContext;
+
+  if (outputElement != null) {
+    outputElement.width = width;
+    outputElement.height = height;
+
+    outputContext = outputElement.getContext('2d');
+    outputContext.save();
+    outputContext.clearRect(0, 0, width, height);
+    outputContext.drawImage(image, Math.min(x, startX), Math.min(y, startY), width, height, 0, 0, width, height);
+    outputContext.restore();
+  }
+
+  info.textContent = `topleft: (${ Math.min(x, startX) }, ${ Math.min(y, startY) }), width: ${ width }, height: ${ height }`;
+
+  started = false;
+});
+
+window.addEventListener('load', (event) => {
+  image = document.images[0];
+  screen.width = image.width;
+  screen.height = image.height;
+  let context = screen.getContext('2d');
+  context.drawImage(image, 0, 0);
+});
+</script>
+</body>
+
+</html>
