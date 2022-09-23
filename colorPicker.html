@@ -16,6 +16,9 @@ body {
 canvas {
   display: block;
 }
+#info {
+  padding: 1em;
+}
   </style>
 </head>
 
@@ -30,12 +33,15 @@ canvas {
 
 <p id="info"></p>
 
-<script>
-const canvas = document.querySelector('#screen');
-const context = canvas.getContext('2d');
-const info = document.querySelector('#info');
+<ol id="output"></ol>
 
-canvas.addEventListener('mousedown', (event) => {
+<script>
+const screen = document.querySelector('#screen');
+const context = screen.getContext('2d');
+const info = document.querySelector('#info');
+const output = document.querySelector('#output');
+
+screen.addEventListener('mousedown', (event) => {
   // Use getBoundingClientRect() to get the distance relative to viewport
   let box = event.target.getBoundingClientRect(),
       x = Math.floor(event.clientX - box.left),
@@ -43,13 +49,13 @@ canvas.addEventListener('mousedown', (event) => {
       data = context.getImageData(x, y, 1, 1).data,
       r = data[0],
       g = data[1],
-      b = data[2];
-  info.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
-  info.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
-  info.textContent = `rgb(${ r }, ${ g }, ${ b }) @ (${ x }, ${ y })`;
+      b = data[2],
+      item = document.createElement('li');
+  item.appendChild(document.createTextNode(`rgb(${ r }, ${ g }, ${ b }) #${ r.toString(16).toUpperCase().padStart(2, '0') }${ g.toString(16).toUpperCase().padStart(2, '0') }${ b.toString(16).toUpperCase().padStart(2, '0') } @ (${ x }, ${ y })`));
+  output.appendChild(item);
 });
 
-canvas.addEventListener('mousemove', (event) => {
+screen.addEventListener('mousemove', (event) => {
   // Use getBoundingClientRect() to get the distance relative to viewport
   let box = event.target.getBoundingClientRect(),
       x = Math.floor(event.clientX - box.left),
@@ -60,13 +66,13 @@ canvas.addEventListener('mousemove', (event) => {
       b = data[2];
   info.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
   info.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
-  info.textContent = `rgb(${ r }, ${ g }, ${ b }) @ (${ x }, ${ y })`;
+  info.textContent = `rgb(${ r }, ${ g }, ${ b }) #${ r.toString(16).toUpperCase().padStart(2, '0') }${ g.toString(16).toUpperCase().padStart(2, '0') }${ b.toString(16).toUpperCase().padStart(2, '0') } @ (${ x }, ${ y })`;
 });
 
 window.addEventListener('load', (event) => {
   let image = document.images[0];
-  canvas.width = image.width;
-  canvas.height = image.height;
+  screen.width = image.width;
+  screen.height = image.height;
   context.drawImage(image, 0, 0);
 });
 </script>
