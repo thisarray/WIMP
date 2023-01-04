@@ -48,6 +48,10 @@ canvas {
 
 <canvas id="blue"></canvas>
 
+<h2>Silhouette</h2>
+
+<canvas id="silhouette"></canvas>
+
 <script>
 const original = document.querySelector('#original');
 
@@ -79,6 +83,13 @@ function blue(r, g, b, a) {
   return [0, 0, b, a];
 }
 
+function silhouette(r, g, b, a) {
+  if (a <= 0) {
+    return [0, 0, 0, 0];
+  }
+  return [0, 0, 0, 255];
+}
+
 window.addEventListener('load', (event) => {
   const WIDTH = original.width;
   const HEIGHT = original.height;
@@ -91,7 +102,8 @@ window.addEventListener('load', (event) => {
     ['#sepia', sepia],
     ['#red', red],
     ['#green', green],
-    ['#blue', blue]]) {
+    ['#blue', blue],
+    ['#silhouette', silhouette]]) {
     canvas = document.querySelector(id);
     context = canvas.getContext('2d');
     canvas.width = WIDTH;
