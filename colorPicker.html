@@ -51,6 +51,8 @@ screen.addEventListener('mousedown', (event) => {
       g = data[1],
       b = data[2],
       item = document.createElement('li');
+  item.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
+  item.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
   item.appendChild(document.createTextNode(`rgb(${ r }, ${ g }, ${ b }) #${ r.toString(16).toUpperCase().padStart(2, '0') }${ g.toString(16).toUpperCase().padStart(2, '0') }${ b.toString(16).toUpperCase().padStart(2, '0') } @ (${ x }, ${ y })`));
   output.appendChild(item);
 });
