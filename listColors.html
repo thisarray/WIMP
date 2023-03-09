@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List colors</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+<section id="imageLoader" class="hidden">
+  <img class="hidden" src="example.png" alt="original source">
+</section>
+
+<h1>List colors</h1>
+
+<canvas id="screen"></canvas>
+
+<ol id="colorList"></ol>
+
+<script>
+const screen = document.querySelector('#screen');
+const context = screen.getContext('2d');
+const colorList = document.querySelector('#colorList');
+
+function parseRGB(rgbString) {
+  return rgbString.substring(4, rgbString.length - 1).split(',', 3).map(v => parseInt(v, 10));
+}
+
+function compareRGB(a, b) {
+  let [r1, g1, b1] = parseRGB(a),
+      [r2, g2, b2] = parseRGB(b);
+  if (r1 < r2) {
+    return -1;
+  }
+  if (r1 > r2) {
+    return 1;
+  }
+  if (g1 < g2) {
+    return -1;
+  }
+  if (g1 > g2) {
+    return 1;
+  }
+  if (b1 < b2) {
+    return -1;
+  }
+  if (b1 > b2) {
+    return 1;
+  }
+  return 0;
+}
+
+window.addEventListener('load', (event) => {
+  let image = document.images[0],
+      colorSet = new Set(),
+      imageData, item;
+  screen.width = image.width;
+  screen.height = image.height;
+  context.drawImage(image, 0, 0);
+  imageData = context.getImageData(0, 0, screen.width, screen.height);
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    colorSet.add(`rgb(${ imageData.data[i] }, ${ imageData.data[i+1] }, ${ imageData.data[i+2] })`);
+  }
+
+  for (let color of Array.from(colorSet).sort(compareRGB)) {
+    let [r, g, b] = parseRGB(color);
+    item = document.createElement('li');
+    item.style.backgroundColor = color;
+    item.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
+    item.appendChild(document.createTextNode(color));
+    colorList.appendChild(item);
+  }
+});
+</script>
+</body>
+
+</html>
