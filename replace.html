@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Replace</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+canvas {
+  display: block;
+}
+#info {
+  padding: 1em;
+}
+  </style>
+</head>
+
+<body>
+<section id="imageLoader" class="hidden">
+  <img class="hidden" src="example.png" alt="original source">
+</section>
+
+<h1>Replace</h1>
+
+<canvas id="screen"></canvas>
+
+<p id="info"></p>
+
+<h2>Colors that will be replaced</h2>
+
+<ol id="colorList"></ol>
+
+<h2>Result</h2>
+
+<canvas id="output"></canvas>
+
+<script>
+/*
+ * Array containing the color to override the original colors.
+ */
+const REPLACEMENT_COLOR = [0, 0, 0, 0];
+
+const screen = document.querySelector('#screen');
+const context = screen.getContext('2d');
+const info = document.querySelector('#info');
+const colorList = document.querySelector('#colorList');
+
+/*
+ * Draw to the canvas in target with the colors in replacedColors replaced.
+ */
+function drawReplaced(target, replacedColors, replacement) {
+  let imageData = context.getImageData(0, 0, screen.width, screen.height),
+      targetContext;
+  target.width = screen.width;
+  target.height = screen.height;
+  targetContext = target.getContext('2d');
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    if (replacedColors.some(c => ((c[0] === imageData.data[i]) && (c[1] === imageData.data[i+1]) && (c[2] === imageData.data[i+2])))) {
+      // If the current pixel has a color in replacedColors,
+      // then replace it with replacement
+      for (let j = 0; j < replacement.length; j++) {
+        imageData.data[i+j] = replacement[j];
+      }
+    }
+  }
+  targetContext.putImageData(imageData, 0, 0);
+}
+
+let replaceList = [];
+
+screen.addEventListener('mousedown', (event) => {
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect(),
+      x = Math.floor(event.clientX - box.left),
+      y = Math.floor(event.clientY - box.top),
+      data = context.getImageData(x, y, 1, 1).data,
+      r = data[0],
+      g = data[1],
+      b = data[2],
+      item = document.createElement('li');
+  replaceList.push([r, g, b]);
+  item.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
+  item.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
+  item.appendChild(document.createTextNode(`rgb(${ r }, ${ g }, ${ b }) #${ r.toString(16).toUpperCase().padStart(2, '0') }${ g.toString(16).toUpperCase().padStart(2, '0') }${ b.toString(16).toUpperCase().padStart(2, '0') } @ (${ x }, ${ y })`));
+  colorList.appendChild(item);
+
+  drawReplaced(document.querySelector('#output'), replaceList, REPLACEMENT_COLOR);
+});
+
+screen.addEventListener('mousemove', (event) => {
+  // Use getBoundingClientRect() to get the distance relative to viewport
+  let box = event.target.getBoundingClientRect(),
+      x = Math.floor(event.clientX - box.left),
+      y = Math.floor(event.clientY - box.top),
+      data = context.getImageData(x, y, 1, 1).data,
+      r = data[0],
+      g = data[1],
+      b = data[2];
+  info.style.backgroundColor = `rgb(${ r }, ${ g }, ${ b })`;
+  info.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
+  info.textContent = `rgb(${ r }, ${ g }, ${ b }) #${ r.toString(16).toUpperCase().padStart(2, '0') }${ g.toString(16).toUpperCase().padStart(2, '0') }${ b.toString(16).toUpperCase().padStart(2, '0') } @ (${ x }, ${ y })`;
+});
+
+window.addEventListener('load', (event) => {
+  let image = document.images[0];
+  screen.width = image.width;
+  screen.height = image.height;
+  context.drawImage(image, 0, 0);
+});
+</script>
+</body>
+
+</html>
