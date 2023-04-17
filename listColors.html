@@ -35,11 +35,70 @@ const screen = document.querySelector('#screen');
 const context = screen.getContext('2d');
 const colorList = document.querySelector('#colorList');
 
+/*
+ * String of digit characters.
+ */
+const DIGITS = '0123456789';
+
+/*
+ * Integer maximum value for a color component.
+ */
+const MAX_COLOR = 255;
+
+/*
+ * Return an array of integer red, green, and blue components parsed from the color string rgbString.
+ */
 function parseRGB(rgbString) {
-  return rgbString.substring(4, rgbString.length - 1).split(',', 3).map(v => parseInt(v, 10));
+  if (typeof rgbString !== 'string') {
+    throw new TypeError('rgbString must be a non-empty string.');
+  }
+  if (rgbString.length < 10) {
+    throw new RangeError('rgbString must be a non-empty string.');
+  }
+
+  let characters = Array.from(rgbString),
+      start = -1,
+      end = -1;
+  for (let i = 0; i < characters.length; i++) {
+    if (DIGITS.includes(characters[i])) {
+      start = i;
+      break;
+    }
+  }
+  for (let i = characters.length - 1; i >= 0; i--) {
+    if (DIGITS.includes(characters[i])) {
+      end = i + 1;
+      break;
+    }
+  }
+
+  if ((start < 0) || (end < 0)) {
+    throw new RangeError('rgbString must be a non-empty string.');
+  }
+
+  return rgbString.substring(start, end).split(',', 3).map(v => Math.max(0, Math.min(parseInt(v, 10), MAX_COLOR)));
 }
 
-function compareRGB(a, b) {
+/*
+ * Return a color string with components r, g, b.
+ */
+function toRGB(r, g, b) {
+  if (typeof r !== 'number') {
+    throw new TypeError('r must be a non-negative number.');
+  }
+  if (typeof g !== 'number') {
+    throw new TypeError('g must be a non-negative number.');
+  }
+  if (typeof b !== 'number') {
+    throw new TypeError('b must be a non-negative number.');
+  }
+  return `rgb(${ Math.max(0, Math.min(r, MAX_COLOR)) }, ${ Math.max(0, Math.min(g, MAX_COLOR)) }, ${ Math.max(0, Math.min(b, MAX_COLOR)) })`;
+}
+
+/*
+ * Comparison function to sort color strings ascending by components.
+ */
+function sortRGB(a, b) {
   let [r1, g1, b1] = parseRGB(a),
       [r2, g2, b2] = parseRGB(b);
   if (r1 < r2) {
@@ -63,24 +122,101 @@ function compareRGB(a, b) {
   return 0;
 }
 
-window.addEventListener('load', (event) => {
-  let image = document.images[0],
-      colorSet = new Set(),
-      imageData, item;
-  screen.width = image.width;
-  screen.height = image.height;
-  context.drawImage(image, 0, 0);
-  imageData = context.getImageData(0, 0, screen.width, screen.height);
-  for (let i = 0; i < imageData.data.length; i += 4) {
-    colorSet.add(`rgb(${ imageData.data[i] }, ${ imageData.data[i+1] }, ${ imageData.data[i+2] })`);
+/*
+ * Unit tests
+ */
+function test() {
+  console.assert(toRGB(-1, MAX_COLOR, MAX_COLOR + 1) === 'rgb(0, 255, 255)',
+                 {msg: 'toRGB() failed.'});
+  console.assert(toRGB(MAX_COLOR + 1, -1, MAX_COLOR) === 'rgb(255, 0, 255)',
+                 {msg: 'toRGB() failed.'});
+  console.assert(toRGB(MAX_COLOR, MAX_COLOR + 1, -1) === 'rgb(255, 255, 0)',
+                 {msg: 'toRGB() failed.'});
+
+  for (let x = 0; x <= MAX_COLOR; x += 32) {
+    for (let y = 0; y <= MAX_COLOR; y += 32) {
+      for (let z = 0; z <= MAX_COLOR; z += 32) {
+        let value = `rgb(${ x }, ${ y }, ${ z })`,
+            [r, g, b] = parseRGB(value);
+        console.assert(r === x, {msg: 'parseRGB() failed.'});
+        console.assert(g === y, {msg: 'parseRGB() failed.'});
+        console.assert(b === z, {msg: 'parseRGB() failed.'});
+        console.assert(toRGB(x, y, z) === value, {msg: 'toRGB() failed.'});
+
+        for (let templateString of [
+          'rgb(x,y,z)',
+          'rgb( x,y,z)',
+          'rgb(x, y,z)',
+          'rgb(x,y, z)',
+          'rgb( x, y,z)',
+          'rgb( x,y, z)',
+          'rgb(x, y, z)',
+          'rgb( x, y, z)']) {
+          let colorString = templateString.replace('x', x.toFixed()).replace('y', y.toFixed()).replace('z', z.toFixed());
+          for (let value of [
+            colorString,
+            ' ' + colorString,
+            colorString + ';',
+            ' ' + colorString + ';']) {
+            [r, g, b] = parseRGB(value);
+            console.assert(r === x, {msg: 'parseRGB() failed.'});
+            console.assert(g === y, {msg: 'parseRGB() failed.'});
+            console.assert(b === z, {msg: 'parseRGB() failed.'});
+          }
+        }
+      }
+    }
   }
 
-  for (let color of Array.from(colorSet).sort(compareRGB)) {
-    let [r, g, b] = parseRGB(color);
+  console.assert(sortRGB('rgb(1, 2, 3)', 'rgb(1, 2, 6)') === -1,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(1, 2, 3)', 'rgb(1, 4, 3)') === -1,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(1, 2, 3)', 'rgb(4, 5, 6)') === -1,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(1, 2, 3)', 'rgb(1, 2, 3)') === 0,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(4,5,6)', 'rgb(4,5,6)') === 0,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(1, 2, 6)', 'rgb(1, 2, 3)') === 1,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(1, 4, 3)', 'rgb(1, 2, 3)') === 1,
+                 {msg: 'sortRGB() failed.'});
+  console.assert(sortRGB('rgb(4, 5, 6)', 'rgb(1, 2, 3)') === 1,
+                 {msg: 'sortRGB() failed.'});
+}
+test();
+
+window.addEventListener('load', (event) => {
+  let image = document.images[0],
+      width = image.width,
+      height = image.height,
+      total = width * height,
+      colorMap = new Map(),
+      imageData, colorString, r, g, b, count, item;
+  screen.width = width;
+  screen.height = height;
+  context.drawImage(image, 0, 0);
+  imageData = context.getImageData(0, 0, width, height);
+
+  // Count the number of pixels with each color
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    colorString = toRGB(imageData.data[i], imageData.data[i+1], imageData.data[i+2]);
+    if (colorMap.has(colorString)) {
+      colorMap.set(colorString, colorMap.get(colorString) + 1);
+    }
+    else {
+      colorMap.set(colorString, 1);
+    }
+  }
+
+  for (let color of Array.from(colorMap.keys()).sort(sortRGB)) {
+    [r, g, b] = parseRGB(color);
+    count = colorMap.get(color);
     item = document.createElement('li');
     item.style.backgroundColor = color;
-    item.style.color = `rgb(${ 255 - r }, ${ 255 - g }, ${ 255 - b })`;
-    item.appendChild(document.createTextNode(color));
+    item.style.color = toRGB(255 - r, 255 - g, 255 - b);
+    item.appendChild(document.createTextNode(`${ color } in ${ count } pixels (${ (count / total * 100).toFixed(2) }%)`));
     colorList.appendChild(item);
   }
 });
