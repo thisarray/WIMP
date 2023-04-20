@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reduce colors</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+.hidden {
+  display: none;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+<section id="imageLoader" class="hidden">
+  <img class="hidden" src="example.png" alt="original source">
+</section>
+
+<h1>Reduce colors</h1>
+
+<form id="reduce" name="reduce">
+<p><label>Reduce the number of colors to:
+<input type="number" id="limit" name="limit" autofocus required max="1000" min="1" placeholder="10" step="1">
+</label>
+<button type="submit">Reduce</button></p>
+
+<canvas id="screen"></canvas>
+</form>
+
+<script>
+/*
+ * String of digit characters.
+ */
+const DIGITS = '0123456789';
+
+/*
+ * Integer maximum value for a color component.
+ */
+const MAX_COLOR = 255;
+
+/*
+ * Return an array of integer red, green, and blue components parsed from the color string rgbString.
+ */
+function parseRGB(rgbString) {
+  if (typeof rgbString !== 'string') {
+    throw new TypeError('rgbString must be a non-empty string.');
+  }
+  if (rgbString.length < 10) {
+    throw new RangeError('rgbString must be a non-empty string.');
+  }
+
+  let characters = Array.from(rgbString),
+      start = -1,
+      end = -1;
+  for (let i = 0; i < characters.length; i++) {
+    if (DIGITS.includes(characters[i])) {
+      start = i;
+      break;
+    }
+  }
+  for (let i = characters.length - 1; i >= 0; i--) {
+    if (DIGITS.includes(characters[i])) {
+      end = i + 1;
+      break;
+    }
+  }
+
+  if ((start < 0) || (end < 0)) {
+    throw new RangeError('rgbString must be a non-empty string.');
+  }
+
+  return rgbString.substring(start, end).split(',', 3).map(v => Math.max(0, Math.min(parseInt(v, 10), MAX_COLOR)));
+}
+
+/*
+ * Return a color string with components r, g, b.
+ */
+function toRGB(r, g, b) {
+  if (typeof r !== 'number') {
+    throw new TypeError('r must be a non-negative number.');
+  }
+  if (typeof g !== 'number') {
+    throw new TypeError('g must be a non-negative number.');
+  }
+  if (typeof b !== 'number') {
+    throw new TypeError('b must be a non-negative number.');
+  }
+  return `rgb(${ Math.max(0, Math.min(r, MAX_COLOR)) }, ${ Math.max(0, Math.min(g, MAX_COLOR)) }, ${ Math.max(0, Math.min(b, MAX_COLOR)) })`;
+}
+
+/*
+ * Return the Euclidean distance between color strings a and b.
+ */
+function distanceRGB(a, b) {
+  let [r1, g1, b1] = parseRGB(a),
+      [r2, g2, b2] = parseRGB(b);
+  return Math.hypot(r1 - r2, g1 - g2, b1 - b2);
+}
+
+/*
+ * Unit tests
+ */
+function test() {
+  console.assert(toRGB(-1, MAX_COLOR, MAX_COLOR + 1) === 'rgb(0, 255, 255)',
+                 {msg: 'toRGB() failed.'});
+  console.assert(toRGB(MAX_COLOR + 1, -1, MAX_COLOR) === 'rgb(255, 0, 255)',
+                 {msg: 'toRGB() failed.'});
+  console.assert(toRGB(MAX_COLOR, MAX_COLOR + 1, -1) === 'rgb(255, 255, 0)',
+                 {msg: 'toRGB() failed.'});
+
+  for (let x = 0; x <= MAX_COLOR; x += 32) {
+    for (let y = 0; y <= MAX_COLOR; y += 32) {
+      for (let z = 0; z <= MAX_COLOR; z += 32) {
+        let value = `rgb(${ x }, ${ y }, ${ z })`,
+            [r, g, b] = parseRGB(value);
+        console.assert(r === x, {msg: 'parseRGB() failed.'});
+        console.assert(g === y, {msg: 'parseRGB() failed.'});
+        console.assert(b === z, {msg: 'parseRGB() failed.'});
+        console.assert(toRGB(x, y, z) === value, {msg: 'toRGB() failed.'});
+
+        for (let templateString of [
+          'rgb(x,y,z)',
+          'rgb( x,y,z)',
+          'rgb(x, y,z)',
+          'rgb(x,y, z)',
+          'rgb( x, y,z)',
+          'rgb( x,y, z)',
+          'rgb(x, y, z)',
+          'rgb( x, y, z)']) {
+          let colorString = templateString.replace('x', x.toFixed()).replace('y', y.toFixed()).replace('z', z.toFixed());
+          for (let value of [
+            colorString,
+            ' ' + colorString,
+            colorString + ';',
+            ' ' + colorString + ';']) {
+            [r, g, b] = parseRGB(value);
+            console.assert(r === x, {msg: 'parseRGB() failed.'});
+            console.assert(g === y, {msg: 'parseRGB() failed.'});
+            console.assert(b === z, {msg: 'parseRGB() failed.'});
+          }
+        }
+      }
+    }
+  }
+
+  console.assert(distanceRGB('rgb(1, 2, 3)', 'rgb(1, 2, 3)') === 0,
+                 {msg: 'distanceRGB() failed.'});
+  console.assert(distanceRGB('rgb(1, 2, 3)', 'rgb(1, 2, 4)') === 1,
+                 {msg: 'distanceRGB() failed.'});
+  console.assert(distanceRGB('rgb(1, 2, 3)', 'rgb(1, 4, 3)') === 2,
+                 {msg: 'distanceRGB() failed.'});
+  console.assert(distanceRGB('rgb(1, 2, 3)', 'rgb(4, 2, 3)') === 3,
+                 {msg: 'distanceRGB() failed.'});
+  console.assert(distanceRGB('rgb(1, 2, 4)', 'rgb(1, 2, 3)') === 1,
+                 {msg: 'distanceRGB() failed.'});
+  console.assert(distanceRGB('rgb(1, 4, 3)', 'rgb(1, 2, 3)') === 2,
+                 {msg: 'distanceRGB() failed.'});
+  console.assert(distanceRGB('rgb(4, 2, 3)', 'rgb(1, 2, 3)') === 3,
+                 {msg: 'distanceRGB() failed.'});
+}
+test();
+
+const form = document.querySelector('#reduce');
+form.addEventListener('submit', (event) => {
+  const screen = document.querySelector('#screen');
+
+  let limit = parseInt(form.limit.value, 10),
+      image = document.images[0],
+      width = image.width,
+      height = image.height,
+      colorMap = new Map(),
+      topColors = [],
+      replacementMap = new Map(),
+      context, imageData, colorString;
+  screen.width = width;
+  screen.height = height;
+  context = screen.getContext('2d');
+  context.drawImage(image, 0, 0);
+  imageData = context.getImageData(0, 0, width, height);
+
+  // Count the number of pixels with each color
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    colorString = toRGB(imageData.data[i], imageData.data[i+1], imageData.data[i+2]);
+    if (colorMap.has(colorString)) {
+      colorMap.set(colorString, colorMap.get(colorString) + 1);
+    }
+    else {
+      colorMap.set(colorString, 1);
+    }
+  }
+
+  // Figure out the limit most common colors
+  for (let [color, count] of colorMap) {
+    topColors.push({
+      color: color,
+      count: count
+    });
+  }
+  // Sort descending by count
+  topColors.sort((a, b) => (b.count - a.count));
+  topColors = topColors.slice(0, limit).map(v => v.color);
+
+  // Replace the less common colors
+  for (let i = 0; i < imageData.data.length; i += 4) {
+    colorString = toRGB(imageData.data[i], imageData.data[i+1], imageData.data[i+2]);
+    if (topColors.includes(colorString)) {
+      continue;
+    }
+    let replacements = [],
+        r, g, b;
+    if (!replacementMap.has(colorString)) {
+      // Find and memoize the closest replacement color from the limit most common colors
+      for (let c of topColors) {
+        replacements.push({
+          color: c,
+          distance: distanceRGB(colorString, c)
+        });
+      }
+      // Sort ascending by distance
+      replacements.sort((a, b) => (a.distance - b.distance));
+      replacementMap.set(colorString, replacements[0].color);
+    }
+
+    // Replace the current color with the closest replacement color
+    [r, g, b] = parseRGB(replacementMap.get(colorString));
+    imageData.data[i] = r;
+    imageData.data[i+1] = g;
+    imageData.data[i+2] = b;
+  }
+
+  // Put the replaced imageData back
+  context.putImageData(imageData, 0, 0);
+
+  event.preventDefault();
+});
+</script>
+</body>
+
+</html>
