@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Radial</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+
+<h1>Radial</h1>
+
+<canvas id="screen"></canvas>
+
+<script>
+const screen = document.querySelector('#screen');
+
+/*
+ * Number amount to change the angle.
+ */
+const ANGLE_DELTA = Math.PI / 32;
+
+/*
+ * Integer increment in pixels to increase the radius.
+ */
+const RADIUS_INCREMENT = 10;
+
+/*
+ * Integer limit in pixels on the radius.
+ */
+const RADIUS_LIMIT = 300;
+
+/*
+ * Return a random integer N such that min <= N < max.
+ */
+function getRandomInteger(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor((Math.random() * (max - min)) + min);
+}
+
+/*
+ * Draw a random walk radial using context in color of width starting at angle startAngle.
+ */
+function drawRadial(context, color, width, startAngle = 0) {
+  let angle = startAngle,
+      radius = 0,
+      last = 0;
+
+  context.save();
+  context.strokeStyle = color;
+  context.lineWidth = width;
+
+  context.beginPath();
+  context.moveTo(0, 0);
+  while (radius < RADIUS_LIMIT) {
+    if (last === 0) {
+      // If the last move was to increment the radius, then all 3 options are available
+      last = getRandomInteger(0, 3);
+      if (last === 0) {
+        // Increment the radius
+        radius += RADIUS_INCREMENT;
+        context.lineTo(radius * Math.cos(angle), radius * Math.sin(angle));
+      }
+      else if (last === 1) {
+        // Travel counterclockwise
+        context.arc(0, 0, radius, angle, angle - ANGLE_DELTA, true);
+        angle -= ANGLE_DELTA;
+      }
+      else {
+        // Travel clockwise
+        context.arc(0, 0, radius, angle, angle + ANGLE_DELTA, false);
+        angle += ANGLE_DELTA;
+      }
+    }
+    else if (last === 1) {
+      if (getRandomInteger(0, 2) < 1) {
+        last = 0;
+        radius += RADIUS_INCREMENT;
+        context.lineTo(radius * Math.cos(angle), radius * Math.sin(angle));
+      }
+      else {
+        // Continue to travel counterclockwise
+        context.arc(0, 0, radius, angle, angle - ANGLE_DELTA, true);
+        angle -= ANGLE_DELTA;
+      }
+    }
+    else {
+      if (getRandomInteger(0, 2) < 1) {
+        last = 0;
+        radius += RADIUS_INCREMENT;
+        context.lineTo(radius * Math.cos(angle), radius * Math.sin(angle));
+      }
+      else {
+        // Continue to travel clockwise
+        context.arc(0, 0, radius, angle, angle + ANGLE_DELTA, false);
+        angle += ANGLE_DELTA;
+      }
+    }
+  }
+  context.stroke();
+
+  context.restore();
+}
+
+window.addEventListener('load', (event) => {
+  screen.width = RADIUS_LIMIT * 2;
+  screen.height = RADIUS_LIMIT * 2;
+
+  let context = screen.getContext('2d');
+  context.save();
+  // Move the origin to the center of the canvas
+  context.translate(RADIUS_LIMIT, RADIUS_LIMIT);
+  drawRadial(context, 'black', 2, getRandomInteger(0, 360) * Math.PI / 180);
+  context.restore();
+});
+</script>
+</body>
+
+</html>
