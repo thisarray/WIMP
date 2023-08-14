@@ -32,7 +32,6 @@ canvas {
 
 <script>
 const screen = document.querySelector('#screen');
-const context = screen.getContext('2d');
 const colorList = document.querySelector('#colorList');
 
 /*
@@ -193,9 +192,10 @@ window.addEventListener('load', (event) => {
       height = image.height,
       total = width * height,
       colorMap = new Map(),
-      imageData, colorString, r, g, b, count, item;
+      context, imageData, colorString, r, g, b, count, item;
   screen.width = width;
   screen.height = height;
+  context = screen.getContext('2d');
   context.drawImage(image, 0, 0);
   imageData = context.getImageData(0, 0, width, height);
 

@@ -37,9 +37,10 @@ canvas {
 
 <script>
 const screen = document.querySelector('#screen');
-const context = screen.getContext('2d');
 const info = document.querySelector('#info');
 const output = document.querySelector('#output');
+
+let context;
 
 screen.addEventListener('mousedown', (event) => {
   // Use getBoundingClientRect() to get the distance relative to viewport
@@ -75,6 +76,7 @@ window.addEventListener('load', (event) => {
   let image = document.images[0];
   screen.width = image.width;
   screen.height = image.height;
+  context = screen.getContext('2d');
   context.drawImage(image, 0, 0);
 });
 </script>

@@ -48,9 +48,11 @@ canvas {
 const REPLACEMENT_COLOR = [0, 0, 0, 0];
 
 const screen = document.querySelector('#screen');
-const context = screen.getContext('2d');
 const info = document.querySelector('#info');
 const colorList = document.querySelector('#colorList');
+
+let replaceList = [],
+    context;
 
 /*
  * Draw to the canvas in target with the colors in replacedColors replaced.
@@ -72,8 +74,6 @@ function drawReplaced(target, replacedColors, replacement) {
   }
   targetContext.putImageData(imageData, 0, 0);
 }
-
-let replaceList = [];
 
 screen.addEventListener('mousedown', (event) => {
   // Use getBoundingClientRect() to get the distance relative to viewport
@@ -112,6 +112,7 @@ window.addEventListener('load', (event) => {
   let image = document.images[0];
   screen.width = image.width;
   screen.height = image.height;
+  context = screen.getContext('2d');
   context.drawImage(image, 0, 0);
 });
 </script>

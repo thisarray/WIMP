@@ -105,9 +105,9 @@ window.addEventListener('load', (event) => {
     ['#blue', blue],
     ['#silhouette', silhouette]]) {
     canvas = document.querySelector(id);
-    context = canvas.getContext('2d');
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
+    context = canvas.getContext('2d');
     context.drawImage(original, 0, 0);
     imageData = context.getImageData(0, 0, WIDTH, HEIGHT);
     for (let i = 0; i < imageData.data.length; i += 4) {
