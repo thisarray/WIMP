@@ -50,37 +50,47 @@ const original = document.querySelector('#original');
 window.addEventListener('load', (event) => {
   const WIDTH = original.width;
   const HEIGHT = original.height;
-  const HALF_WIDTH = WIDTH / 2;
-  const HALF_HEIGHT = HEIGHT / 2;
+  const HALF_WIDTH = Math.floor(WIDTH / 2);
+  const HALF_HEIGHT = Math.floor(HEIGHT / 2);
 
   let canvas, context;
 
   canvas = document.querySelector('#flipHorizontal');
-  context = canvas.getContext('2d');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
+  context = canvas.getContext('2d');
   context.translate(WIDTH, 0);
   context.scale(-1, 1);
   context.drawImage(original, 0, 0);
 
   canvas = document.querySelector('#flipVertical');
-  context = canvas.getContext('2d');
   canvas.width = WIDTH;
   canvas.height = HEIGHT;
+  context = canvas.getContext('2d');
   context.translate(0, HEIGHT);
   context.scale(1, -1);
   context.drawImage(original, 0, 0);
 
+  canvas = document.querySelector('#rotate180');
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+  context = canvas.getContext('2d');
+  // Rotate around the center of the canvas
+  context.translate(HALF_WIDTH, HALF_HEIGHT);
+  context.rotate(Math.PI);
+  context.translate(-HALF_WIDTH, -HALF_HEIGHT);
+  context.drawImage(original, 0, 0);
+
+  // width and height are swapped for 90 and 270 degree rotation until we rotate
   for (let [id, angle] of [
     ['#rotate90', Math.PI / 2],
-    ['#rotate180', Math.PI],
     ['#rotate270', 3 * Math.PI / 2]]) {
     canvas = document.querySelector(id);
+    canvas.width = HEIGHT;
+    canvas.height = WIDTH;
     context = canvas.getContext('2d');
-    canvas.width = WIDTH;
-    canvas.height = HEIGHT;
     // Rotate around the center of the canvas
-    context.translate(HALF_WIDTH, HALF_HEIGHT);
+    context.translate(HALF_HEIGHT, HALF_WIDTH);
     context.rotate(angle);
     context.translate(-HALF_WIDTH, -HALF_HEIGHT);
     context.drawImage(original, 0, 0);
