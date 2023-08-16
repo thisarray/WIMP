@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overlay</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+
+<h1>Overlay</h1>
+
+<h2>Original</h2>
+
+<img id="original" src="example.png" alt="original source">
+
+<h2>Red</h2>
+
+<canvas id="red"></canvas>
+
+<h2>Green</h2>
+
+<canvas id="green"></canvas>
+
+<h2>Blue</h2>
+
+<canvas id="blue"></canvas>
+
+<script>
+const original = document.querySelector('#original');
+
+window.addEventListener('load', (event) => {
+  const WIDTH = original.width;
+  const HEIGHT = original.height;
+
+  let canvas, context;
+
+  for (let [id, color] of [
+    ['#red', 'rgba(255, 0, 0, 0.25)'],
+    ['#green', 'rgba(0, 255, 0, 0.25)'],
+    ['#blue', 'rgba(0, 0, 255, 0.25)']]) {
+    canvas = document.querySelector(id);
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+    context = canvas.getContext('2d');
+    context.drawImage(original, 0, 0);
+    context.fillStyle = color;
+    context.fillRect(0, 0, WIDTH, HEIGHT);
+  }
+});
+</script>
+</body>
+
+</html>
