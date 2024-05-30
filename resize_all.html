@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+
+<html lang="en-US">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resize All</title>
+  <style type="text/css" media="screen">
+body {
+  background-color: white;
+  color: black;
+}
+canvas {
+  display: block;
+}
+  </style>
+</head>
+
+<body>
+
+<h1>Resize All</h1>
+
+<img id="original" src="example.png" alt="original source">
+
+<h2>Resized</h2>
+
+<output id="result">
+</output>
+
+<script>
+const ORIGINAL = document.querySelector('#original');
+const OUTPUT = document.querySelector('#result');
+
+/*
+ * Array of string dimensions.
+ */
+const SIZES = ['32', '64', '128', '256', '512'];
+
+window.addEventListener('load', (event) => {
+  for (let size of SIZES) {
+    let header = document.createElement('h3'),
+        canvas = document.createElement('canvas'),
+        context;
+
+    header.appendChild(document.createTextNode(size));
+    OUTPUT.appendChild(header);
+    canvas.width = size;
+    canvas.height = size;
+    OUTPUT.appendChild(canvas);
+
+    context = canvas.getContext('2d');
+    console.log(canvas.width, canvas.height);
+    context.drawImage(ORIGINAL, 0, 0, canvas.width, canvas.height);
+  }
+});
+</script>
+</body>
+
+</html>
