@@ -34,7 +34,41 @@ const OUTPUT = document.querySelector('#result');
 /*
  * Array of string dimensions.
  */
-const SIZES = ['32', '64', '128', '256', '512'];
+const DIMENSIONS = ['32x32', '64x64', '128x128', '256x256', '640x480'];
+
+function parseDimensions(dimensionString, delimiter = 'x') {
+  if (typeof dimensionString !== 'string') {
+    throw new TypeError('dimensionString must be a non-empty string.');
+  }
+  if (dimensionString.length < 3) {
+    throw new RangeError('dimensionString must be a non-empty string.');
+  }
+  if (typeof delimiter !== 'string') {
+    throw new TypeError('delimiter must be a non-empty string.');
+  }
+  if (delimiter.length < 1) {
+    throw new RangeError('delimiter must be a non-empty string.');
+  }
+
+  return dimensionString.split(delimiter, 2).map(v => parseInt(v, 10));
+}
+
+/*
+ * A small test suite.
+ */
+function test() {
+  console.assert(parseDimensions('1x1').join(',') === '1,1',
+                 {msg: 'parseDimensions() failed.'});
+  console.assert(parseDimensions('2x4').join(',') === '2,4',
+                 {msg: 'parseDimensions() failed.'});
+  console.assert(parseDimensions('640x480').join(',') === '640,480',
+                 {msg: 'parseDimensions() failed.'});
+  for (let dimension of DIMENSIONS) {
+    console.assert(parseDimensions(dimension).join(',') === dimension.replace('x', ','),
+                   {msg: 'parseDimensions() failed.'});
+  }
+}
+test();
 
 window.addEventListener('load', (event) => {
   for (let size of SIZES) {
