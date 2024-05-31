@@ -36,6 +36,9 @@ const OUTPUT = document.querySelector('#result');
  */
 const DIMENSIONS = ['32x32', '64x64', '128x128', '256x256', '640x480'];
 
+/*
+ * Return the width and height parsed from a string of the form "${ width }x${ height }".
+ */
 function parseDimensions(dimensionString, delimiter = 'x') {
   if (typeof dimensionString !== 'string') {
     throw new TypeError('dimensionString must be a non-empty string.');
@@ -71,15 +74,16 @@ function test() {
 test();
 
 window.addEventListener('load', (event) => {
-  for (let size of SIZES) {
+  for (let dimension of DIMENSIONS) {
     let header = document.createElement('h3'),
         canvas = document.createElement('canvas'),
+        [width, height] = parseDimensions(dimension),
         context;
 
-    header.appendChild(document.createTextNode(size));
+    header.appendChild(document.createTextNode(dimension));
     OUTPUT.appendChild(header);
-    canvas.width = size;
-    canvas.height = size;
+    canvas.width = width;
+    canvas.height = height;
     OUTPUT.appendChild(canvas);
 
     context = canvas.getContext('2d');
