@@ -32,9 +32,9 @@ const ORIGINAL = document.querySelector('#original');
 const OUTPUT = document.querySelector('#result');
 
 /*
- * Array of string dimensions.
+ * Array of unique string dimensions.
  */
-const DIMENSIONS = [
+const DIMENSIONS = Array.from(new Set([
   // Apple
   "16x16", "32x32", "48x48", "55x55", "58x58", "64x64", "66x66", "80x80", "88x88",
   "92x92", "100x100", "102x102", "108x108", "128x128", "172x172", "196x196",
@@ -48,7 +48,8 @@ const DIMENSIONS = [
   "100x100", "107x107", "142x142", "150x150", "176x176", "188x188",
   "200x200", "225x225", "256x256", "284x284",
   "300x300", "310x310", "388x388", "465x465", "600x600", "620x620", "1240x1240"
-];
+]));
+DIMENSIONS.sort();
 
 /*
  * Return the width and height parsed from a string of the form "${ width }x${ height }".
