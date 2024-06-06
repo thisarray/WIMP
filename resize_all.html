@@ -49,7 +49,6 @@ const DIMENSIONS = Array.from(new Set([
   "200x200", "225x225", "256x256", "284x284",
   "300x300", "310x310", "388x388", "465x465", "600x600", "620x620", "1240x1240"
 ]));
-DIMENSIONS.sort();
 
 /*
  * Return the width and height parsed from a string of the form "${ width }x${ height }".
@@ -87,6 +86,18 @@ function test() {
   }
 }
 test();
+
+// Sort DIMENSIONS ascending by width and then height
+DIMENSIONS.sort((a, b) => {
+  let [aw, ah] = parseDimensions(a),
+      [bw, bh] = parseDimensions(b);
+  if (aw === bw) {
+    return (ah - bh);
+  }
+  else {
+    return (aw - bw);
+  }
+});
 
 window.addEventListener('load', (event) => {
   for (let dimension of DIMENSIONS) {
