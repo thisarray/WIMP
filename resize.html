@@ -27,13 +27,13 @@ canvas {
 <canvas id="resized" width="640" height="480"></canvas>
 
 <script>
-const original = document.querySelector('#original');
-const canvas = document.querySelector('#resized');
+const ORIGINAL = document.querySelector('#original');
+const CANVAS = document.querySelector('#resized');
 
 window.addEventListener('load', (event) => {
-  let context = canvas.getContext('2d');
-  console.log(canvas.width, canvas.height);
-  context.drawImage(original, 0, 0, canvas.width, canvas.height);
+  let context = CANVAS.getContext('2d');
+  console.log(CANVAS.width, CANVAS.height);
+  context.drawImage(ORIGINAL, 0, 0, CANVAS.width, CANVAS.height);
 });
 </script>
 </body>
